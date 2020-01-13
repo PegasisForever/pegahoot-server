@@ -9,8 +9,12 @@ fun parseJSON(s: String): JSONObject {
     return jsonParser.parse(s) as JSONObject
 }
 
+fun String.toFrame(): Frame.Text{
+    return Frame.Text(this)
+}
+
 fun JSONObject.toFrame(): Frame.Text{
-    return Frame.Text(this.toJSONString())
+    return toJSONString().toFrame()
 }
 
 fun Map<String,String>.toFrame():Frame.Text{
