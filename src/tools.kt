@@ -1,0 +1,20 @@
+package site.pegasis.hoot.server
+
+import io.ktor.http.cio.websocket.Frame
+import org.json.simple.JSONObject
+import org.json.simple.parser.JSONParser
+
+private val jsonParser = JSONParser()
+fun parseJSON(s: String): JSONObject {
+    return jsonParser.parse(s) as JSONObject
+}
+
+fun JSONObject.toFrame(): Frame.Text{
+    return Frame.Text(this.toJSONString())
+}
+
+fun Map<String,String>.toFrame():Frame.Text{
+    val obj=JSONObject()
+    obj.putAll(this)
+    return obj.toFrame()
+}

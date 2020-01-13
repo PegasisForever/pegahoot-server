@@ -1,39 +1,68 @@
 package site.pegasis.hoot.server
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.websocket.*
-import io.ktor.http.cio.websocket.*
-import java.time.*
+import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.readText
+import io.ktor.http.content.default
+import io.ktor.routing.routing
+import io.ktor.websocket.DefaultWebSocketServerSession
+import io.ktor.websocket.WebSockets
+import io.ktor.websocket.webSocket
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import org.json.simple.JSONObject
+import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
-    install(io.ktor.websocket.WebSockets) {
+fun Application.module() {
+    install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
-        maxFrameSize = Long.MAX_VALUE
-        masking = false
+        timeout = Duration.ofSeconds(60)
     }
 
-    routing {
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
+    val users = HashMap<String, DefaultWebSocketServerSession>()
 
-        webSocket("/echo") {
-            send(Frame.Text("Hi from server"))
-            while (true) {
-                val frame = incoming.receive()
-                if (frame is Frame.Text) {
-                    send(Frame.Text("Client said: " + frame.readText()))
+    routing {
+        webSocket("/client") {
+            var userName: String? = null
+            try {
+                while (true) {
+                    val frame = incoming.receive()
+                    val text = if (frame is Frame.Text) frame.readText() else continue
+
+                    try {
+                        val json = parseJSON(text)
+                        when (json["command"]) {
+                            "join" -> {
+                                val name = json["name"] as String
+                                val res= when{
+                                    users.containsKey(name) -> "existed"
+                                    userName!=null -> "joined"
+                                    else -> {
+                                        users[name] = this
+                                        userName = name
+                                        "success"
+                                    }
+                                }
+
+                                send(mapOf("response" to res).toFrame())
+                            }
+
+                        }
+                    }catch (e:Throwable){
+                        e.printStackTrace()
+                    }
                 }
+            } catch (e: ClosedReceiveChannelException) {
+                println("onClose ${closeReason.await()}")
+            } catch (e: Throwable) {
+                println("onError ${closeReason.await()}")
+                e.printStackTrace()
+            } finally {
+                userName?.let { users.remove(it) }
             }
+
         }
     }
 }
