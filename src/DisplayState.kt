@@ -15,5 +15,6 @@ data class DisplayState(
 enum class DisplayActivity {
     JOIN,
     GAME,
+    SCOREBOARD,
     FINAL
 }

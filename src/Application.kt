@@ -1,5 +1,7 @@
 package site.pegasis.hoot.server
 
+import ClientActivity
+import ClientState
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.http.cio.websocket.Frame
@@ -8,9 +10,11 @@ import io.ktor.routing.routing
 import io.ktor.websocket.DefaultWebSocketServerSession
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Duration
-
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -20,21 +24,29 @@ fun Application.module() {
         timeout = Duration.ofSeconds(60)
     }
 
-    val users = HashMap<String, DefaultWebSocketServerSession>()
+    val clients = HashMap<DefaultWebSocketServerSession, ClientState>()
     val displays = ArrayList<DefaultWebSocketServerSession>()
     var displayState = DisplayState()
 
-    suspend fun sendDisplayUpdate(action: DisplayState.() -> DisplayState){
-        displayState= action(displayState)
-        val jsonObj=displayState.toJSONObject()
+    suspend fun sendDisplayState(action: DisplayState.() -> DisplayState) {
+        displayState = action(displayState)
+        val jsonObj = displayState.toJSONObject()
         displays.forEach {
             it.send(jsonObj.toFrame())
         }
     }
 
+    suspend fun DefaultWebSocketServerSession.sendClientState(action: ClientState.() -> ClientState) {
+        clients[this] = action(clients[this]!!)
+        send(clients[this]!!.toJSONObject().toFrame())
+    }
+
+    fun DefaultWebSocketServerSession.getState() = clients[this]!!
+
     routing {
         webSocket("/client") {
-            var userName: String? = null
+            clients[this] = ClientState()
+            sendClientState { this }
             try {
                 while (true) {
                     val frame = incoming.receive()
@@ -45,20 +57,28 @@ fun Application.module() {
                         when (json["command"]) {
                             "join" -> {
                                 val name = json["name"] as String
-                                val res = when {
-                                    userName != null -> "joined"
-                                    users.containsKey(name) -> "existed"
+                                when {
+                                    getState().name != null -> sendClientState { copy(joinBtnErrorText = "You already joined.") }
+                                    clients.values.any { it.name == name } -> sendClientState {
+                                        copy(
+                                            joinBtnErrorText = "This user name is existed."
+                                        )
+                                    }
                                     else -> {
-                                        users[name] = this
-                                        userName = name
-                                        sendDisplayUpdate{
-                                            copy(users = users.keys.toList())
+                                        sendClientState {
+                                            copy(
+                                                joinBtnErrorText = null,
+                                                name = name,
+                                                activity = ClientActivity.WAIT
+                                            )
                                         }
-                                        "success"
+                                        sendDisplayState {
+                                            copy(
+                                                users = clients.values.mapNotNull { it.name }
+                                            )
+                                        }
                                     }
                                 }
-
-                                send(mapOf("response" to res).toFrame())
                             }
 
                         }
@@ -72,11 +92,11 @@ fun Application.module() {
                 println("onError ${closeReason.await()}")
                 e.printStackTrace()
             } finally {
-                userName?.let {
-                    users.remove(it)
-                    sendDisplayUpdate{
-                        copy(users = users.keys.toList())
-                    }
+                clients.remove(this)
+                sendDisplayState {
+                    copy(
+                        users = clients.values.mapNotNull { it.name }
+                    )
                 }
             }
         }
@@ -100,5 +120,11 @@ fun Application.module() {
             }
         }
     }
+
+    GlobalScope.launch {
+        delay(1000L)
+        println("World!")
+    }
 }
+
 
