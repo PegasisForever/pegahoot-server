@@ -8,7 +8,6 @@ import io.ktor.routing.routing
 import io.ktor.websocket.DefaultWebSocketServerSession
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import java.time.Duration
 
@@ -22,7 +21,16 @@ fun Application.module() {
     }
 
     val users = HashMap<String, DefaultWebSocketServerSession>()
-    val messageChannel = Channel<Map<String, String>>(Int.MAX_VALUE)
+    val displays = ArrayList<DefaultWebSocketServerSession>()
+    var displayState = DisplayState()
+
+    suspend fun sendDisplayUpdate(action: DisplayState.() -> DisplayState){
+        displayState= action(displayState)
+        val jsonObj=displayState.toJSONObject()
+        displays.forEach {
+            it.send(jsonObj.toFrame())
+        }
+    }
 
     routing {
         webSocket("/client") {
@@ -43,7 +51,9 @@ fun Application.module() {
                                     else -> {
                                         users[name] = this
                                         userName = name
-                                        messageChannel.send(mapOf("info" to "join", "name" to name))
+                                        sendDisplayUpdate{
+                                            copy(users = users.keys.toList())
+                                        }
                                         "success"
                                     }
                                 }
@@ -64,22 +74,29 @@ fun Application.module() {
             } finally {
                 userName?.let {
                     users.remove(it)
-                    messageChannel.send(mapOf("info" to "exit", "name" to userName))
+                    sendDisplayUpdate{
+                        copy(users = users.keys.toList())
+                    }
                 }
             }
         }
 
         webSocket("/display") {
             try {
+                displays.add(this)
+                send(displayState.toJSONObject().toFrame())
                 while (true) {
-                    val msg=messageChannel.receive()
-                    send(msg.toFrame())
+                    val frame = incoming.receive()
+                    val text = if (frame is Frame.Text) frame.readText() else continue
+                    println(text)
                 }
             } catch (e: ClosedReceiveChannelException) {
                 println("onClose ${closeReason.await()}")
             } catch (e: Throwable) {
                 println("onError ${closeReason.await()}")
                 e.printStackTrace()
+            } finally {
+                displays.remove(this)
             }
         }
     }
