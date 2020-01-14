@@ -12,7 +12,6 @@ import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Duration
 
@@ -24,6 +23,7 @@ fun Application.module() {
         timeout = Duration.ofSeconds(60)
     }
 
+    val disconnectedStates = ArrayList<ClientState>()
     val clients = HashMap<DefaultWebSocketServerSession, ClientState>()
     val displays = ArrayList<DefaultWebSocketServerSession>()
     var displayState = DisplayState()
@@ -61,16 +61,22 @@ fun Application.module() {
                                     getState().name != null -> sendClientState { copy(joinBtnErrorText = "You already joined.") }
                                     clients.values.any { it.name == name } -> sendClientState {
                                         copy(
-                                            joinBtnErrorText = "This user name is existed."
+                                            joinBtnErrorText = "This user name already existed."
                                         )
                                     }
                                     else -> {
+                                        val disconnectedState = disconnectedStates.find { it.name == name }
                                         sendClientState {
-                                            copy(
-                                                joinBtnErrorText = null,
-                                                name = name,
-                                                activity = ClientActivity.WAIT
-                                            )
+                                            if(disconnectedState!=null){
+                                                disconnectedStates.remove(disconnectedState)
+                                                disconnectedState
+                                            }else{
+                                                copy(
+                                                    joinBtnErrorText = null,
+                                                    name = name,
+                                                    activity = ClientActivity.WAIT
+                                                )
+                                            }
                                         }
                                         sendDisplayState {
                                             copy(
@@ -92,6 +98,7 @@ fun Application.module() {
                 println("onError ${closeReason.await()}")
                 e.printStackTrace()
             } finally {
+                disconnectedStates.add(getState())
                 clients.remove(this)
                 sendDisplayState {
                     copy(
@@ -122,8 +129,7 @@ fun Application.module() {
     }
 
     GlobalScope.launch {
-        delay(1000L)
-        println("World!")
+
     }
 }
 
