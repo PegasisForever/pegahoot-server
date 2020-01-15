@@ -1,3 +1,5 @@
+package site.pegasis.hoot.server
+
 import org.json.simple.JSONObject
 
 data class ClientState(
