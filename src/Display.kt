@@ -8,9 +8,17 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 private val displays = ArrayList<DefaultWebSocketServerSession>()
 private var displayState = DisplayState()
 
+private val stateOverride: DisplayState? =
+    null
+//    DisplayState(
+//    activity = DisplayActivity.COUNTDOWN,
+//    countDownSeconds = 2,
+//    questionIndex = 1
+//)
+
 suspend fun setDisplayState(action: DisplayState.() -> DisplayState) {
     displayState = action(displayState)
-    val jsonObj = displayState.toJSONObject()
+    val jsonObj = (stateOverride ?: displayState).toJSONObject()
     displays.forEach {
         it.send(jsonObj.toFrame())
     }
@@ -19,16 +27,14 @@ suspend fun setDisplayState(action: DisplayState.() -> DisplayState) {
 val displayHandler: suspend DefaultWebSocketServerSession.() -> Unit = {
     try {
         displays.add(this)
-        send(displayState.toJSONObject().toFrame())
+        send((stateOverride ?: displayState).toJSONObject().toFrame())
         while (true) {
             val frame = incoming.receive()
             val text = if (frame is Frame.Text) frame.readText() else continue
             try {
                 val json = parseJSON(text)
                 when (json["command"]) {
-                    "start" -> {
-
-                    }
+                    "start" -> startGame()
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()

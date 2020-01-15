@@ -5,8 +5,6 @@ import io.ktor.application.install
 import io.ktor.routing.routing
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -19,10 +17,6 @@ fun Application.module() {
     routing {
         webSocket("/client", null, clientHandler)
         webSocket("/display", null, displayHandler)
-    }
-
-    GlobalScope.launch {
-
     }
 }
 
