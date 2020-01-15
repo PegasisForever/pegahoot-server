@@ -1,12 +1,18 @@
 package site.pegasis.hoot.server
 
+import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 
-data class UserScore(val name: String, val score: Int)
-
-class ScoreMap : HashMap<String, Int>(), JSONObjectAble {
+data class UserScore(val name: String, val score: Int) : JSONObjectAble {
     override fun toJSONObject() = JSONObject().apply {
-        putAll(this@ScoreMap)
+        this["name"] = name
+        this["score"] = score
+    }
+}
+
+class ScoreMap : HashMap<String, Int>(), JSONArrayAble {
+    override fun toJSONArray(): JSONArray {
+        return toUserScoreList().toJSONArray()
     }
 
     fun removeUser(name: String?): ScoreMap {
@@ -57,17 +63,19 @@ data class DisplayState(
     val questionText: String? = null,
     val questionSentence: String? = null,
     val questionLeftSeconds: Int? = null,
-    val answerTimes: List<AnswerTime> = emptyList()
+    val answerTimes: List<AnswerTime> = emptyList(),
+    val questionAnswer: String? = null
 ) {
     fun toJSONObject() = JSONObject().apply {
         this["activity"] = activity.name
-        this["userScoreMap"] = userScoreMap.toJSONObject()
+        this["userScores"] = userScoreMap.toJSONArray()
         this["questionIndex"] = questionIndex
         this["countDownSeconds"] = countDownSeconds
         this["questionText"] = questionText
         this["questionSentence"] = questionSentence
         this["questionLeftSeconds"] = questionLeftSeconds
         this["answerTimes"] = answerTimes.toJSONArray()
+        this["questionAnswer"] = questionAnswer
     }
 }
 

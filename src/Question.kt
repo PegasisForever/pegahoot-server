@@ -1,6 +1,6 @@
 package site.pegasis.hoot.server
 
-data class Question(val question: String, val sentence: String, val awnser: String)
+data class Question(val question: String, val sentence: String, val answer: String)
 
 val questions = arrayOf(
     Question("Fill in the blank:", "Pega __ xhx", "loves"),

@@ -38,3 +38,7 @@ fun List<*>.toJSONArray() = JSONArray().apply {
 interface JSONObjectAble{
     fun toJSONObject():JSONObject
 }
+
+interface JSONArrayAble{
+    fun toJSONArray():JSONArray
+}

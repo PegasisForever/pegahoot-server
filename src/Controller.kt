@@ -14,6 +14,7 @@ const val gameWaitTime = 15
 var onAnswerSubmitted: (suspend (name:String, answer:String, index:Int, clientSession: DefaultWebSocketServerSession) -> Unit)? = null
 val gameController: suspend CoroutineScope.() -> Unit = {
     questions.forEachIndexed { index, question ->
+        //Count down 3s
         repeat(3){
             setDisplayState {copy(
                 activity = DisplayActivity.COUNTDOWN,
@@ -28,11 +29,12 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             delay(1000)
         }
 
+        //Start game
         val gameStartTime = System.currentTimeMillis()
         onAnswerSubmitted = out@{ name, answer, i, clientSession ->
             if (i!=index) return@out
             val timeUsed = (System.currentTimeMillis() - gameStartTime) / 1000.0
-            val isCorrect = answer.trim().toLowerCase() == question.awnser
+            val isCorrect = answer.trim().toLowerCase() == question.answer
             val scoreGain = if (isCorrect) ((gameWaitTime - timeUsed) / gameWaitTime * 1000).toInt() else 0
 
             setDisplayState {copy(
@@ -42,7 +44,8 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             clientSession.setClientState {copy(
                 activity = ClientActivity.GAMEWAIT,
                 score = score + scoreGain,
-                isLastAnswerCorrect = isCorrect
+                isLastAnswerCorrect = isCorrect,
+                rank = null
             )}
         }
         namedClients.setStates {copy(
@@ -64,8 +67,10 @@ val gameController: suspend CoroutineScope.() -> Unit = {
         )}
         onAnswerSubmitted = null
 
+        //Game end, show score
         setDisplayState {copy(
-            activity = DisplayActivity.ANSWER
+            activity = DisplayActivity.ANSWER,
+            questionAnswer = question.answer
         )}
         val sortedUserScores=sortedUserScores
         namedClients.setStates {
