@@ -2,6 +2,8 @@ package site.pegasis.hoot.server
 
 import org.json.simple.JSONObject
 
+data class UserScore(val name: String, val score: Int)
+
 class ScoreMap : HashMap<String, Int>(), JSONObjectAble {
     override fun toJSONObject() = JSONObject().apply {
         putAll(this@ScoreMap)
@@ -14,10 +16,18 @@ class ScoreMap : HashMap<String, Int>(), JSONObjectAble {
         return clone
     }
 
-    fun addScore(name:String,score:Int):ScoreMap{
+    fun addScore(name: String, score: Int): ScoreMap {
         val clone = this.clone()
-        clone[name]=clone[name]!!+score
+        clone[name] = clone[name]!! + score
         return clone
+    }
+
+    fun toUserScoreList(): List<UserScore> {
+        return this.map { (name, score) ->
+            UserScore(name, score)
+        }
+            .toList()
+            .sortedByDescending { it.score }
     }
 
     override fun clone(): ScoreMap {
@@ -66,6 +76,5 @@ enum class DisplayActivity {
     COUNTDOWN,
     GAME,
     ANSWER,
-    SCOREBOARD,
     FINAL
 }

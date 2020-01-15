@@ -41,7 +41,8 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             )}
             clientSession.setClientState {copy(
                 activity = ClientActivity.GAMEWAIT,
-                score = score + scoreGain
+                score = score + scoreGain,
+                isLastAnswerCorrect = isCorrect
             )}
         }
         namedClients.setStates {copy(
@@ -62,5 +63,28 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             answerTimes = emptyList()
         )}
         onAnswerSubmitted = null
+
+        setDisplayState {copy(
+            activity = DisplayActivity.ANSWER
+        )}
+        val sortedUserScores=sortedUserScores
+        namedClients.setStates {
+            val userScore=sortedUserScores.find { it.name==name }!!
+            val rank = sortedUserScores.indexOf(userScore)
+            var followingUser: String? = null
+            var scoreBehindFollowingUser: Int? = null
+            if (rank != 0) {
+                val followingUserScore = sortedUserScores[rank - 1]
+                followingUser = followingUserScore.name
+                scoreBehindFollowingUser = followingUserScore.score - score
+            }
+            copy(
+                activity = ClientActivity.GAMEWAIT,
+                rank = rank+1,
+                followingUser = followingUser,
+                scoreBehindFollowingUser = scoreBehindFollowingUser
+            )
+        }
+        delay(5000)
     }
 }

@@ -4,9 +4,13 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.websocket.DefaultWebSocketServerSession
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlin.collections.ArrayList
 
 private val displays = ArrayList<DefaultWebSocketServerSession>()
 private var displayState = DisplayState()
+
+val sortedUserScores:List<UserScore>
+    get() = displayState.userScoreMap.toUserScoreList()
 
 private val stateOverride: DisplayState? =
     null
@@ -15,7 +19,8 @@ private val stateOverride: DisplayState? =
 //        questionIndex = 1,
 //        questionSentence = "question.sentence",
 //        questionText = "question.question:",
-//        questionLeftSeconds = 10
+//        questionLeftSeconds = 10,
+//        answerTimes = listOf(AnswerTime("Pega", 3.78, true), AnswerTime("xhx", 5.55, false))
 //)
 
 suspend fun setDisplayState(action: DisplayState.() -> DisplayState) {

@@ -10,7 +10,11 @@ data class ClientState(
     val questionIndex: Int? = null,
     val countDownSeconds: Int? = null,
     val questionText: String? = null,
-    val questionSentence: String? = null
+    val questionSentence: String? = null,
+    val isLastAnswerCorrect: Boolean? = null,
+    val rank:Int?=null,
+    val followingUser:String?=null,
+    val scoreBehindFollowingUser:Int?=null
 ) {
     fun toJSONObject() = JSONObject().apply {
         this["activity"] = activity.name
@@ -21,6 +25,10 @@ data class ClientState(
         this["countDownSeconds"] = countDownSeconds
         this["questionText"] = questionText
         this["questionSentence"] = questionSentence
+        this["isLastAnswerCorrect"] = isLastAnswerCorrect
+        this["rank"] = rank
+        this["followingUser"] = followingUser
+        this["scoreBehindFollowingUser"] = scoreBehindFollowingUser
     }
 }
 

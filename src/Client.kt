@@ -14,14 +14,16 @@ val namedClients: Map<DefaultWebSocketServerSession, ClientState>
     get() = clients.filter { it.value.name != "" }
 
 private val stateOverride: ClientState? =
-    null
+null
 //    ClientState(
-//        activity = ClientActivity.GAME,
-//        countDownSeconds = 2,
-//        questionIndex = 1,
+//        activity = ClientActivity.GAMEWAIT,
 //        name = "Pega",
-//        questionText = "Fill in the blanks",
-//        questionSentence = "Pega __ xhx"
+//        score = 2000,
+//        isLastAnswerCorrect = true,
+//        questionIndex = 1,
+//        rank = 2,
+//        followingUser = "xhx",
+//        scoreBehindFollowingUser = 555
 //)
 
 suspend fun Map<DefaultWebSocketServerSession, ClientState>.setStates(action: ClientState.() -> ClientState) {
