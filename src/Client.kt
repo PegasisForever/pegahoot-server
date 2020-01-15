@@ -11,9 +11,9 @@ private val clients = HashMap<DefaultWebSocketServerSession, ClientState>()
 val allClients: Map<DefaultWebSocketServerSession, ClientState>
     get() = clients
 val namedClients: Map<DefaultWebSocketServerSession, ClientState>
-    get() = clients.filter { it.value.name!="" }
+    get() = clients.filter { it.value.name != "" }
 
-private val stateOverride:ClientState?=
+private val stateOverride: ClientState? =
     null
 //    ClientState(
 //        activity = ClientActivity.GAME,
@@ -26,13 +26,13 @@ private val stateOverride:ClientState?=
 
 suspend fun Map<DefaultWebSocketServerSession, ClientState>.setStates(action: ClientState.() -> ClientState) {
     clients.keys.forEach { session ->
-        clients[session] = stateOverride?:action(clients[session]!!)
+        clients[session] = stateOverride ?: action(clients[session]!!)
         session.send(clients[session]!!.toJSONObject().toFrame())
     }
 }
 
 suspend fun DefaultWebSocketServerSession.setClientState(action: ClientState.() -> ClientState) {
-    clients[this] = stateOverride?:action(clients[this]!!)
+    clients[this] = stateOverride ?: action(clients[this]!!)
     send(clients[this]!!.toJSONObject().toFrame())
 }
 
@@ -74,13 +74,15 @@ val clientHandler: suspend DefaultWebSocketServerSession.() -> Unit = {
                                 }
                                 setDisplayState {
                                     copy(
-                                        users = clients.values.mapNotNull { it.name }
+                                        userScoreMap = userScoreMap + (name to 0)
                                     )
                                 }
                             }
                         }
                     }
+                    "submit" -> {
 
+                    }
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()
@@ -93,10 +95,10 @@ val clientHandler: suspend DefaultWebSocketServerSession.() -> Unit = {
         e.printStackTrace()
     } finally {
         disconnectedStates.add(getState())
-        clients.remove(this)
+        val removedState = clients.remove(this)!!
         setDisplayState {
             copy(
-                users = clients.values.mapNotNull { it.name }
+                userScoreMap = userScoreMap.removeUser(removedState.name)
             )
         }
     }

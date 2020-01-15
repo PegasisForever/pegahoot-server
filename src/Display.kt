@@ -11,9 +11,11 @@ private var displayState = DisplayState()
 private val stateOverride: DisplayState? =
     null
 //    DisplayState(
-//    activity = DisplayActivity.COUNTDOWN,
-//    countDownSeconds = 2,
-//    questionIndex = 1
+//        activity = DisplayActivity.GAME,
+//        questionIndex = 1,
+//        questionSentence = "question.sentence",
+//        questionText = "question.question:",
+//        questionLeftSeconds = 10
 //)
 
 suspend fun setDisplayState(action: DisplayState.() -> DisplayState) {

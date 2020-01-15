@@ -9,6 +9,7 @@ fun startGame() {
     GlobalScope.launch(block = gameController)
 }
 
+val gameWaitTime=15
 val gameController: suspend CoroutineScope.() -> Unit = {
     questions.forEachIndexed { index, question ->
         repeat(3){
@@ -25,14 +26,19 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             delay(1000)
         }
 
-        setDisplayState {copy(
-            activity = DisplayActivity.GAME
-        )}
         namedClients.setStates {copy(
             activity = ClientActivity.GAME,
             questionSentence = question.sentence,
             questionText = question.question
         )}
-        delay(5000)
+        repeat(gameWaitTime){
+            setDisplayState {copy(
+                activity = DisplayActivity.GAME,
+                questionSentence = question.sentence,
+                questionText = question.question,
+                questionLeftSeconds = gameWaitTime - it
+            )}
+            delay(1000)
+        }
     }
 }
