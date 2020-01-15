@@ -29,7 +29,9 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             activity = DisplayActivity.GAME
         )}
         namedClients.setStates {copy(
-            activity = ClientActivity.GAME
+            activity = ClientActivity.GAME,
+            questionSentence = question.sentence,
+            questionText = question.question
         )}
         delay(5000)
     }
