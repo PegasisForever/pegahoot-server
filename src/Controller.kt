@@ -17,11 +17,19 @@ val gameController: suspend CoroutineScope.() -> Unit = {
                 countDownSeconds = 3 - it,
                 questionIndex = index + 1
             )}
+            namedClients.setStates {copy(
+                activity = ClientActivity.COUNTDOWN,
+                countDownSeconds = 3 - it,
+                questionIndex = index + 1
+            )}
             delay(1000)
         }
 
         setDisplayState {copy(
             activity = DisplayActivity.GAME
+        )}
+        namedClients.setStates {copy(
+            activity = ClientActivity.GAME
         )}
         delay(5000)
     }

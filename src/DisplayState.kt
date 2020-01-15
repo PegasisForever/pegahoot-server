@@ -5,8 +5,8 @@ import org.json.simple.JSONObject
 data class DisplayState(
     val activity: DisplayActivity = DisplayActivity.JOIN,
     val users: List<String> = ArrayList(),
-    val questionIndex: Int = 0,
-    val countDownSeconds: Int = 0
+    val questionIndex: Int? = null,
+    val countDownSeconds: Int? = null
 ) {
     fun toJSONObject() = JSONObject().apply {
         this["activity"] = activity.name
