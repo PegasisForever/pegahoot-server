@@ -7,16 +7,26 @@ class ScoreMap : HashMap<String, Int>(), JSONObjectAble {
         putAll(this@ScoreMap)
     }
 
-    fun removeUser(name:String?):ScoreMap{
-        if (name==null) return this
-        val clone=this.clone() as ScoreMap
+    fun removeUser(name: String?): ScoreMap {
+        if (name == null) return this
+        val clone = this.clone()
         clone.remove(name)
         return clone
     }
 
-    operator fun plus(another:Pair<String,Int>):ScoreMap{
-        val clone=this.clone() as ScoreMap
-        clone[another.first]=another.second
+    fun addScore(name:String,score:Int):ScoreMap{
+        val clone = this.clone()
+        clone[name]=clone[name]!!+score
+        return clone
+    }
+
+    override fun clone(): ScoreMap {
+        return super.clone() as ScoreMap
+    }
+
+    operator fun plus(another: Pair<String, Int>): ScoreMap {
+        val clone = this.clone()
+        clone[another.first] = another.second
         return clone
     }
 }
@@ -37,7 +47,7 @@ data class DisplayState(
     val questionText: String? = null,
     val questionSentence: String? = null,
     val questionLeftSeconds: Int? = null,
-    val answerTimes: ArrayList<AnswerTime> = ArrayList()
+    val answerTimes: List<AnswerTime> = emptyList()
 ) {
     fun toJSONObject() = JSONObject().apply {
         this["activity"] = activity.name
@@ -47,7 +57,7 @@ data class DisplayState(
         this["questionText"] = questionText
         this["questionSentence"] = questionSentence
         this["questionLeftSeconds"] = questionLeftSeconds
-        this["answerTimes"]=answerTimes.toJSONArray()
+        this["answerTimes"] = answerTimes.toJSONArray()
     }
 }
 

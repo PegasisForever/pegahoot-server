@@ -81,7 +81,12 @@ val clientHandler: suspend DefaultWebSocketServerSession.() -> Unit = {
                         }
                     }
                     "submit" -> {
-
+                        onAnswerSubmitted?.invoke(
+                            getState().name!!,
+                            json["answer"] as String,
+                            (json["index"] as Long).toInt(),
+                            this
+                        )
                     }
                 }
             } catch (e: Throwable) {
