@@ -4,6 +4,7 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.websocket.DefaultWebSocketServerSession
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.async
 
 private val displays = ArrayList<DefaultWebSocketServerSession>()
 private var displayState = DisplayState()
@@ -24,18 +25,18 @@ private val stateOverride: DisplayState? =
 //        answerTimes = listOf(AnswerTime("Pega", 3.78, true), AnswerTime("xhx", 5.55, false))
 //)
 
-suspend fun setDisplayState(action: DisplayState.() -> DisplayState) {
+fun setDisplayState(action: DisplayState.() -> DisplayState) {
     displayState = action(displayState)
     val jsonObj = (stateOverride ?: displayState).toJSONObject()
     displays.forEach {
-        it.send(jsonObj.toFrame())
+        it.sendAsync(jsonObj.toFrame())
     }
 }
 
 val displayHandler: suspend DefaultWebSocketServerSession.() -> Unit = {
     try {
         displays.add(this)
-        send((stateOverride ?: displayState).toJSONObject().toFrame())
+        sendAsync((stateOverride ?: displayState).toJSONObject().toFrame())
         while (true) {
             val frame = incoming.receive()
             val text = if (frame is Frame.Text) frame.readText() else continue

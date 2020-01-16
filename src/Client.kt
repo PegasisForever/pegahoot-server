@@ -8,8 +8,6 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 private val disconnectedStates = ArrayList<ClientState>()
 private val clients = HashMap<DefaultWebSocketServerSession, ClientState>()
 
-val allClients: Map<DefaultWebSocketServerSession, ClientState>
-    get() = clients
 val namedClients: Map<DefaultWebSocketServerSession, ClientState>
     get() = clients.filter { it.value.name != null }
 
@@ -26,16 +24,16 @@ null
 //        scoreBehindFollowingUser = 555
 //)
 
-suspend fun Map<DefaultWebSocketServerSession, ClientState>.setStates(action: ClientState.() -> ClientState) {
+fun Map<DefaultWebSocketServerSession, ClientState>.setStates(action: ClientState.() -> ClientState) {
     keys.forEach { session ->
         clients[session] = stateOverride ?: action(clients[session]!!)
-        session.send(clients[session]!!.toJSONObject().toFrame())
+        session.sendAsync(clients[session]!!.toJSONObject().toFrame())
     }
 }
 
-suspend fun DefaultWebSocketServerSession.setClientState(action: ClientState.() -> ClientState) {
+fun DefaultWebSocketServerSession.setClientState(action: ClientState.() -> ClientState) {
     clients[this] = stateOverride ?: action(clients[this]!!)
-    send(clients[this]!!.toJSONObject().toFrame())
+    sendAsync(clients[this]!!.toJSONObject().toFrame())
 }
 
 fun DefaultWebSocketServerSession.getState() = clients[this]!!
