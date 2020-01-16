@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 fun startGame() {
     GlobalScope.launch(block = gameController)
@@ -96,4 +97,7 @@ val gameController: suspend CoroutineScope.() -> Unit = {
     setDisplayState {copy(
         activity = DisplayActivity.FINAL
     )}
+
+    delay(5000)
+    exitProcess(0)
 }
