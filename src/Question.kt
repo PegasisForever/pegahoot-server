@@ -18,7 +18,7 @@ val questions = listOf(
 
     Question("Use the verb AVOIR:", "Elle __ acheté la robe.", "a"),
     Question("Use the verb AVOIR:", "Je les __ achetés pour toi.", "ai"),
-    Question("Use the verb AVOIR:", "J’ai vu deux chats dans le jardin.", "ai"),
+    Question("Use the verb AVOIR:", "J’__ vu deux chats dans le jardin.", "ai"),
     Question("Use the verb AVOIR:", "Tu __ une sœur.", "as"),
     Question("Use the verb AVOIR:", "Vous __ les mêmes yeux.", "avez"),
     Question("Use the verb AVOIR:", "Nous __ deux chats.", "avons"),
