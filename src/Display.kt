@@ -4,7 +4,6 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.websocket.DefaultWebSocketServerSession
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlin.collections.ArrayList
 
 private val displays = ArrayList<DefaultWebSocketServerSession>()
 private var displayState = DisplayState()
@@ -12,7 +11,7 @@ private var displayState = DisplayState()
 val sortedUserScores:List<UserScore>
     get() = displayState.userScoreMap.toUserScoreList()
 
-fun getDisplayState() = displayState
+fun getDisplayState() = stateOverride ?: displayState
 
 private val stateOverride: DisplayState? =
     null

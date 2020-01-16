@@ -24,7 +24,7 @@ class ScoreMap : HashMap<String, Int>(), JSONArrayAble {
 
     fun addScore(name: String, score: Int): ScoreMap {
         val clone = this.clone()
-        clone[name] = clone[name]!! + score
+        clone[name] = clone[name]?:0 + score
         return clone
     }
 

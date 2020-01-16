@@ -37,6 +37,5 @@ enum class ClientActivity {
     WAIT,
     COUNTDOWN,
     GAME,
-    GAMEWAIT,
-    FINAL
+    GAMEWAIT
 }
