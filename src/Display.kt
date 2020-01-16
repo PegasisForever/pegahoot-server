@@ -4,7 +4,6 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.websocket.DefaultWebSocketServerSession
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.async
 
 private val displays = ArrayList<DefaultWebSocketServerSession>()
 private var displayState = DisplayState()

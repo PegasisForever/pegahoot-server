@@ -52,7 +52,8 @@ val gameController: suspend CoroutineScope.() -> Unit = {
         namedClients.setStates {copy(
             activity = ClientActivity.GAME,
             questionSentence = question.sentence,
-            questionText = question.question
+            questionText = question.question,
+            isLastAnswerCorrect = false
         )}
         repeat(gameWaitTime){
             setDisplayState {copy(
