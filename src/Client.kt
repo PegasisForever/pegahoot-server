@@ -11,7 +11,7 @@ private val clients = HashMap<DefaultWebSocketServerSession, ClientState>()
 val allClients: Map<DefaultWebSocketServerSession, ClientState>
     get() = clients
 val namedClients: Map<DefaultWebSocketServerSession, ClientState>
-    get() = clients.filter { it.value.name != "" }
+    get() = clients.filter { it.value.name != null }
 
 private val stateOverride: ClientState? =
 null
@@ -27,7 +27,7 @@ null
 //)
 
 suspend fun Map<DefaultWebSocketServerSession, ClientState>.setStates(action: ClientState.() -> ClientState) {
-    clients.keys.forEach { session ->
+    keys.forEach { session ->
         clients[session] = stateOverride ?: action(clients[session]!!)
         session.send(clients[session]!!.toJSONObject().toFrame())
     }

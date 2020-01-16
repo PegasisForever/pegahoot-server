@@ -72,9 +72,9 @@ val gameController: suspend CoroutineScope.() -> Unit = {
             activity = DisplayActivity.ANSWER,
             questionAnswer = question.answer
         )}
-        val sortedUserScores=sortedUserScores
+        val sortedUserScores = sortedUserScores
         namedClients.setStates {
-            val userScore=sortedUserScores.find { it.name==name }!!
+            val userScore = sortedUserScores.find { it.name == name }!!
             val rank = sortedUserScores.indexOf(userScore)
             var followingUser: String? = null
             var scoreBehindFollowingUser: Int? = null
