@@ -92,4 +92,8 @@ val gameController: suspend CoroutineScope.() -> Unit = {
         }
         delay(5000)
     }
+
+    setDisplayState {copy(
+        activity = DisplayActivity.FINAL
+    )}
 }
