@@ -12,6 +12,8 @@ private var displayState = DisplayState()
 val sortedUserScores:List<UserScore>
     get() = displayState.userScoreMap.toUserScoreList()
 
+fun getDisplayState() = displayState
+
 private val stateOverride: DisplayState? =
     null
 //    DisplayState(

@@ -32,10 +32,10 @@ val gameController: suspend CoroutineScope.() -> Unit = {
         //Start game
         val gameStartTime = System.currentTimeMillis()
         onAnswerSubmitted = out@{ name, answer, i, clientSession ->
-            if (i!=index) return@out
+            if (i != index || getDisplayState().answerTimes.find { it.name == name } != null) return@out
             val timeUsed = (System.currentTimeMillis() - gameStartTime) / 1000.0
             val isCorrect = answer.trim().toLowerCase() == question.answer
-            val scoreGain = if (isCorrect) ((gameWaitTime - timeUsed) / gameWaitTime * 1000).toInt() else 0
+            val scoreGain = if (isCorrect) ((gameWaitTime - timeUsed) / gameWaitTime * 700 + 300).toInt() else 0
 
             setDisplayState {copy(
                 answerTimes = answerTimes + AnswerTime(name, timeUsed, isCorrect),
