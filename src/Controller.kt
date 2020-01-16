@@ -11,7 +11,7 @@ fun startGame() {
     GlobalScope.launch(block = gameController)
 }
 
-const val gameWaitTime = 15
+const val gameWaitTime = 22
 var onAnswerSubmitted: (suspend (name:String, answer:String, index:Int, clientSession: DefaultWebSocketServerSession) -> Unit)? = null
 val gameController: suspend CoroutineScope.() -> Unit = {
     questions.forEachIndexed { index, question ->

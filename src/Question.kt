@@ -44,4 +44,4 @@ val questions = listOf(
     Question("Use the verb FAIRE:", "Elle __ du jogging.", "fait"),
     Question("Use the verb FAIRE:", "Nous __ du vélo.", "faisons"),
     Question("Use the verb FAIRE:", "Vous __ de l'aerobic.", "faites")
-).shuffled()
+).shuffled().subList(0,30)
